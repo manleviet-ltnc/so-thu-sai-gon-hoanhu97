@@ -41,10 +41,30 @@ namespace SoThuXiGon
         {
             if (e.Data.GetDataPresent(DataFormats.Text))
             {
-                ListBox lb = (ListBox)sender;
-                lb.Items.Add(e.Data.GetData(DataFormats.Text));
+                bool test = false;
+                for (int i = 0; i < lstDanhSach.Items.Count; i++)
+                {
+                    string st = lstDanhSach.Items[i].ToString();
+                    string data = e.Data.GetData(DataFormats.Text).ToString();
+                    if (data == st)
+                        test = true;
+                }
+                if (test == false)
+                {
+                    int newIndex = lstDanhSach.IndexFromPoint(lstDanhSach.PointToClient(new Point(e.X, e.Y)));
+                    lstDanhSach.Items.Remove(e.Data.GetData(DataFormats.Text));
+                    if (newIndex != -1)
+                        lstDanhSach.Items.Insert(newIndex, e.Data.GetData(DataFormats.Text));
+                    else
+                    {
+                        ListBox lb = (ListBox)sender;
+                        lb.Items.Add(e.Data.GetData(DataFormats.Text));
+                    }
+                }
+
             }
         }
+        bool luu = false;
         private void save(object sender, EventArgs e)
         { 
             //mo tap tin
@@ -53,11 +73,12 @@ namespace SoThuXiGon
             foreach (var item in lstDanhSach.Items)
                 write.WriteLine(item.ToString());
             write.Close();
+            luu = true;
         }
 
         private void mnuClose_Click(object sender, EventArgs e)
         {
-            Close();
+            Application.Exit();
         }
 
         private void mnuLoad_Click(object sender, EventArgs e)
@@ -94,6 +115,30 @@ namespace SoThuXiGon
         private void Form1_Load(object sender, EventArgs e)
         {
             timer1.Enabled = true;
+        }
+
+        private void btnXoa_Click(object sender, EventArgs e)
+        {
+            lstDanhSach.Items.Remove(lstDanhSach.SelectedItem);
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (luu == false)
+            {
+                DialogResult kq = MessageBox.Show("Bạn có muốn lưu danh sách?", "THÔNG BÁO", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+                if (kq == DialogResult.Yes)
+                {
+                    save(sender, e);
+                    e.Cancel = false;
+                }
+                else if (kq == DialogResult.No)
+                    e.Cancel = false;
+                else
+                    e.Cancel = true;
+            }
+            else
+            mnuClose_Click(sender, e);
         }
     }
 }
